@@ -3,13 +3,45 @@ import { test, expect } from '@playwright/test';
 test.beforeEach(async ({ page }) => {
   await page.addInitScript(() => {
     const synth = new EventTarget();
-    synth.getVoices = () => [{ voiceURI: 'test', name: 'Test Mandarin', lang: 'zh-CN' }];
-    synth.cancel = () => {};
+    synth.getVoices = () => [
+      { voiceURI: 'test', name: 'Test Mandarin', lang: 'zh-CN', localService: true },
+      { voiceURI: 'google', name: 'Google 普通话', lang: 'zh-CN', localService: false },
+    ];
+    let cancelledUntil = 0;
+    synth.cancel = () => { cancelledUntil = Date.now() + 100; };
     synth.resume = () => {};
-    synth.speak = utterance => { window.currentUtterance = utterance; utterance.onstart(); };
+    synth.speak = utterance => {
+      window.currentUtterance = utterance;
+      // Reproduce a silent voice and an engine that needs cancellation to settle.
+      if (Date.now() < cancelledUntil || utterance.voice?.voiceURI === 'google') return;
+      utterance.onstart();
+    };
     Object.defineProperty(window, 'speechSynthesis', { value: synth });
+    Object.defineProperty(window, 'SpeechSynthesisUtterance', { value: class { constructor(text) { this.text = text; } } });
   });
   await page.goto('/');
+});
+
+test('silent Google voice times out and reset recovers with a device voice', async ({ page }) => {
+  await page.clock.install();
+  await page.getByRole('button', { name: 'Try an example' }).click();
+  await page.getByRole('button', { name: 'Read from line 2:' }).click();
+  await expect(page.locator('#status')).toHaveText('Reading line 2 of 4');
+  await page.getByLabel('Mandarin voice').selectOption('google');
+  await expect(page.getByRole('button', { name: 'Resume', exact: true })).toBeEnabled();
+  await expect(page.locator('#status')).toContainText('tap Resume');
+  await page.getByRole('button', { name: 'Resume', exact: true }).click();
+  await page.clock.runFor(200);
+  await expect(page.locator('#status')).toHaveText('Starting line 2 of 4');
+  await page.clock.runFor(8000);
+  await expect(page.locator('#status')).toContainText('did not start');
+  await page.getByRole('button', { name: 'Reset audio', exact: true }).click();
+  await expect(page.getByLabel('Mandarin voice')).toHaveValue('test');
+  await page.getByRole('button', { name: 'Resume', exact: true }).click();
+  await page.clock.runFor(200);
+  await expect(page.locator('#status')).toHaveText('Reading line 2 of 4');
+  await page.evaluate(() => window.currentUtterance.onend());
+  await expect(page.locator('#status')).toHaveText('Reading line 3 of 4');
 });
 
 test('example, playback, jump, pause, stop, and saved corrections', async ({ page }, testInfo) => {

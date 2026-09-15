@@ -36,9 +36,9 @@ $('#app').innerHTML = `
       <section class="reader" aria-labelledby="reader-title">
         <div class="section-heading"><h2 id="reader-title"><span class="step">02</span> Read & listen</h2><span id="line-count" class="pill">0 lines</span></div>
         <div class="toolbar">
-          <div class="playback"><button id="play" class="primary" disabled>▶ Read from start</button><button id="pause" disabled>Pause</button><button id="stop" disabled>Stop</button></div>
+          <div class="playback"><button id="play" class="primary" disabled>▶ Read from start</button><button id="pause" disabled>Pause</button><button id="stop" disabled>Stop</button><button id="reset-audio">Reset audio</button></div>
           <div class="audio-settings"><label for="voice">Mandarin voice<select id="voice"><option value="">Device default Mandarin</option></select></label><label for="speed">Speed<select id="speed"><option value="0.65">0.65× · Slow</option><option value="0.85" selected>0.85× · Gentle</option><option value="1">1× · Normal</option><option value="1.2">1.2× · Fast</option></select></label></div>
-          <p class="hint">Tap a Chinese line to read from there. Resume restarts the paused line.</p>
+          <p class="hint">Tap a Chinese line to read from there. Changing voice or speed pauses reading; tap Resume to restart that line. Reset audio clears playback and selects a device voice when available.</p>
           <p id="voice-note" class="hint"></p>
         </div>
         <div class="reading-meta"><span id="status" role="status" aria-live="polite">Ready when you are</span><label class="check"><input type="checkbox" id="follow" checked> Follow along</label></div>
@@ -86,8 +86,12 @@ function preview() {
   $('#alignment-note').textContent = extra ? `${matching} There are ${english.length - chinese.length} extra English entries. Choose another matching mode or combine translations onto matching lines before preparing.` : english.length && english.length !== chinese.length ? `${matching} Counts differ; check each pair before preparing. Unmatched lines will have empty translations.` : english.length ? `${matching} Paired in order; check that the meanings match.` : `${chinese.length} Chinese lines. Add English now or in the reading cards.`;
   $('#prepare').disabled = !chinese.length || extra;
 }
+function audioOptions() {
+  // Resolve the voice again: browsers may replace voice objects after voiceschanged.
+  return { voice: window.speechSynthesis?.getVoices().find(v => v.voiceURI === $('#voice').value), rate: Number($('#speed').value) };
+}
 function play(index) {
-  player.play(lines, index, { voice: voices.find(v => v.voiceURI === $('#voice').value), rate: Number($('#speed').value) });
+  player.play(lines, index, audioOptions());
 }
 function fitEditors() {
   document.querySelectorAll('.line-content textarea').forEach(field => {
@@ -126,7 +130,7 @@ function updateVoices() {
   const previous = $('#voice').value;
   voices = window.speechSynthesis.getVoices().filter(v => /^(zh(?:[-_](?:CN|TW|SG|Hans|Hant))?|cmn)(?:[-_]|$)/i.test(v.lang) && !/cantonese|粤|粵/i.test(v.name));
   $('#voice').replaceChildren(new Option('Device default Mandarin', ''));
-  voices.forEach(v => $('#voice').add(new Option(`${v.name} (${v.lang})`, v.voiceURI)));
+  voices.forEach(v => $('#voice').add(new Option(`${v.name} (${v.lang}) · ${v.localService ? 'Device' : 'Online'}`, v.voiceURI)));
   if (voices.some(v => v.voiceURI === previous)) $('#voice').value = previous;
   $('#voice-note').textContent = voices.length ? 'Voice quality depends on your device. Some voices require an internet connection.' : 'No Mandarin voice is listed yet. Try playback, or install a Mandarin voice in your device’s speech settings and reload.';
 }
@@ -139,10 +143,19 @@ for (const id of ['chinese', 'english', 'split', 'english-split']) $(`#${id}`).a
   if (lines.length) $('#status').textContent = 'Input changed · prepare reading to update these cards';
 });
 $('#play').onclick = () => play(0);
-$('#pause').onclick = () => player.state === 'paused' ? player.resume() : player.pause();
+$('#pause').onclick = () => player.state === 'paused' ? player.resume(audioOptions()) : player.pause();
 $('#stop').onclick = () => player.stop();
+$('#reset-audio').disabled = !supported;
+$('#reset-audio').onclick = () => {
+  player.reset();
+  updateVoices();
+  const local = voices.find(v => v.localService);
+  $('#voice').value = local?.voiceURI || '';
+  $('#status').textContent = `Audio reset · ${local ? local.name : 'device default Mandarin'} selected. ${player.state === 'paused' ? 'Tap Resume' : 'Tap Read from start'} to try again. If silence continues, reload this page.`;
+};
 for (const id of ['voice', 'speed']) $(`#${id}`).onchange = () => {
-  if (player.state !== 'idle') play(player.index);
+  player.pause();
+  $('#status').textContent = player.state === 'paused' ? 'Audio settings changed · tap Resume to restart this line' : 'Audio settings changed · tap a line or Read from start';
 };
 document.addEventListener('visibilitychange', () => { if (document.hidden) player.pause(); });
 window.addEventListener('pagehide', () => player.stop());

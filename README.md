@@ -41,9 +41,15 @@ Designed for iPhone Safari, desktop Chrome, and Pixel Chrome. Automated playback
 
 - Load voices, select Mandarin, read the example, and verify highlighting advances through all four lines.
 - Jump to another line during playback, pause/resume, stop, and restart.
-- Change speed and voice during reading; the current line should restart.
+- Change speed and voice during reading; playback should pause. Tap Resume to restart the current line with the new setting.
 - Switch apps or lock the screen: the app pauses when hidden; return and tap Resume.
 - Test a long passage, traditional characters, mismatched translations, and refreshing after card edits.
 - If no Mandarin voice is listed or playback fails, install/enable a Mandarin voice in device speech settings, reload, and retry. Some voices need internet access. Playback is intended with the page visible.
+
+### Recovering silent audio
+
+Voice choices are marked **Device** or **Online**. If a voice never starts, the player reports a timeout after 8 seconds and keeps your place for retry. It also detects speech that starts but never reports completion, using a generous limit based on text length. **Reset audio** clears pending speech and selects an available device Mandarin voice (or the browser default if none is listed); tap **Resume** or **Read from start** afterward. Changing voices no longer immediately starts speech from the dropdown. Replacement speech waits briefly after cancellation, and late events from an old voice cannot interrupt a new reading.
+
+If the browser's speech service remains silent after resetting, reload the page and choose a Device voice. Drafts and prepared reading edits are saved in browser storage when available. Automated tests simulate an unresponsive online voice and verify recovery; they cannot guarantee a particular provider's voice availability or audible output.
 
 Automatic pinyin may need correction for names, rare characters, and ambiguous pronunciations. Browser speech engines independently choose pronunciations.
