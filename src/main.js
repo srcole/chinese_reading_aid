@@ -40,6 +40,7 @@ $('#app').innerHTML = `
           <div class="audio-settings"><label for="voice">Mandarin voice<select id="voice"><option value="">Device default Mandarin</option></select></label><label for="speed">Speed<select id="speed"><option value="0.65">0.65× · Slow</option><option value="0.85" selected>0.85× · Gentle</option><option value="1">1× · Normal</option><option value="1.2">1.2× · Fast</option></select></label></div>
           <p class="hint">Tap a Chinese line to read from there. Changing voice or speed pauses reading; tap Resume to restart that line. Reset audio clears playback and selects a device voice when available.</p>
           <p id="voice-note" class="hint"></p>
+          <p class="hint">Still silent? <a href="./speech-check.html" style="text-decoration:underline">Open the browser voice check</a> to test a short phrase and get a diagnostic report.</p>
         </div>
         <div class="reading-meta"><span id="status" role="status" aria-live="polite">Ready when you are</span><label class="check"><input type="checkbox" id="follow" checked> Follow along</label></div>
         <div id="cards"><div class="empty"><span lang="zh">读</span><h3>A little reading goes a long way.</h3><p>Paste your passage or try the example,<br>then prepare your reading.</p></div></div>

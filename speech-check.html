@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Voice check · Slowly</title>
+  <style>
+    body{font:16px/1.6 system-ui,sans-serif;max-width:700px;margin:40px auto;padding:0 20px;color:#263b34;background:#f6f5ef}h1{font-size:28px}label{display:block}select,button{font:inherit;padding:10px;margin:8px 0;min-height:44px;max-width:100%}button{cursor:pointer}pre{white-space:pre-wrap;overflow-wrap:anywhere;background:white;padding:16px;border:1px solid #ddd;border-radius:8px;font-size:12px}#result{padding:16px;border-left:4px solid #315a45;background:#fff}a{color:#315a45}.hint{font-size:14px;color:#586856}
+  </style>
+</head>
+<body>
+  <a href="./">← Back to reading</a>
+  <h1>Check your browser’s voice</h1>
+  <p>This plays a short fixed phrase directly through your browser, without the reading app’s playback controls. It does not use your passage.</p>
+  <label for="check-voice">Mandarin voice</label>
+  <select id="check-voice"><option value="">Default Mandarin</option></select>
+  <div>
+    <button id="check-mandarin">Test Mandarin: 你好，欢迎。</button>
+    <button id="check-english">Test default English</button>
+    <button id="check-stop">Stop test</button>
+  </div>
+  <p id="result" role="status">Choose a voice, then test. Listen for the spoken phrase.</p>
+  <p class="hint">If both tests fail on macOS, fully quit Chrome with ⌘Q and reopen it. If they still fail, compare this page in Safari and test a voice in macOS Accessibility → Read & Speak (called Spoken Content on older versions).</p>
+  <details><summary>Diagnostic report</summary><pre id="report"></pre></details>
+  <button id="copy-report">Copy diagnostic report</button>
+  <p class="hint">The report contains browser/version information, available voice names, and speech events. It contains no pasted Chinese or English text.</p>
+  <script type="module" src="/src/speech-check.js"></script>
+</body>
+</html>

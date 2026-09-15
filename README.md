@@ -52,4 +52,10 @@ Voice choices are marked **Device** or **Online**. If a voice never starts, the 
 
 If the browser's speech service remains silent after resetting, reload the page and choose a Device voice. Drafts and prepared reading edits are saved in browser storage when available. Automated tests simulate an unresponsive online voice and verify recovery; they cannot guarantee a particular provider's voice availability or audible output.
 
+If every voice fails, open **the browser voice check** below the audio controls (or `speech-check.html`). It sends a fixed phrase directly to the native speech API without the reader’s cancellation, resume, or queue logic. Test Mandarin and default English separately. Its copyable diagnostic report includes browser/version, voices, engine state, and event timings, but no user passages. Completion events do not prove the sound was audible; listen to the sample as well.
+
+On macOS, fully quitting Chrome with Command-Q restarts more of its speech machinery than closing a tab or opening Incognito. If a direct test still fails after reopening Chrome, compare Safari and the voice preview in macOS Accessibility settings to narrow down the failure. This is a diagnostic step, not a guaranteed fix.
+
+For development, `node scripts/diagnose-speech.mjs [site URL]` opens a separate visible Chrome profile and plays a short fixed Mandarin sample through both native speech and the app. It logs actual speech events, unlike the simulated unit/browser suite; no normal browsing profile or saved passages are read. Google voices may not be available in the test profile. Requires installed Google Chrome.
+
 Automatic pinyin may need correction for names, rare characters, and ambiguous pronunciations. Browser speech engines independently choose pronunciations.
