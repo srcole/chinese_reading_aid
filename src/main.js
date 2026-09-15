@@ -13,7 +13,7 @@ let saved;
 try { saved = JSON.parse(localStorage.getItem('slowly-draft')); } catch { /* Storage is optional. */ }
 
 $('#app').innerHTML = `
-  <header class="site-header"><a class="brand" href="./"><span lang="zh" class="seal">慢</span> slowly<span class="brand-note">CHINESE READING COMPANION</span></a><span class="header-note">A little practice, every day.</span></header>
+  <header class="site-header"><a class="brand" href="./"><img class="brand-logo" src="./images/slowly-paper-mouth.png" width="60" height="60" alt="A cheerful paper mascot reading aloud"> slowly<span class="brand-note">CHINESE READING COMPANION</span></a><span class="header-note">A little practice, every day.</span></header>
   <main>
     <section class="intro"><div class="eyebrow">YOUR WORDS. YOUR PACE.</div><h1>Make room for <em>reading.</em></h1><p>Chinese, pinyin, and meaning. Follow along, one line at a time.</p></section>
     <div class="workspace">
